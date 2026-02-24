@@ -1,0 +1,18 @@
+{
+  "class_indices": {
+    "cataract": 0,
+    "diabetic_retinopathy": 1,
+    "glaucoma": 2,
+    "normal": 3
+  },
+  "class_names": [
+    "cataract",
+    "diabetic_retinopathy",
+    "glaucoma",
+    "normal"
+  ],
+  "num_classes": 4,
+  "img_size": 224,
+  "test_accuracy": 0.898,
+  "model_type": "MobileNetV2"
+}

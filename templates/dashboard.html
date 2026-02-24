@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Dashboard — EyeDetect AI{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <div class="page-breadcrumb">
+      <a href="{% url 'home' %}">Home</a> / <span>Dashboard</span>
+    </div>
+    <h1 class="page-title">📊 Detection Dashboard</h1>
+    <p class="page-sub">Analytics and statistics for all eye disease scans.</p>
+  </div>
+</div>
+
+<div class="container dashboard-container">
+
+  <!-- STATS ROW -->
+  <div class="stat-cards">
+    <div class="stat-card">
+      <div class="stat-icon">🔬</div>
+      <div class="stat-body">
+        <div class="stat-num">{{ total }}</div>
+        <div class="stat-label">Total Detections</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">👤</div>
+      <div class="stat-body">
+        <div class="stat-num">{{ patients_total }}</div>
+        <div class="stat-label">Total Patients</div>
+      </div>
+    </div>
+    {% for ds in disease_stats %}
+    <div class="stat-card">
+      <div class="stat-icon">
+        {% if ds.predicted_disease == 'cataract' %}😶
+        {% elif ds.predicted_disease == 'diabetic_retinopathy' %}🩸
+        {% elif ds.predicted_disease == 'glaucoma' %}💧
+        {% else %}✅{% endif %}
+      </div>
+      <div class="stat-body">
+        <div class="stat-num">{{ ds.count }}</div>
+        <div class="stat-label">{{ ds.predicted_disease|title }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- CHARTS ROW -->
+  <div class="dashboard-charts">
+    <div class="chart-card">
+      <h3>Disease Distribution</h3>
+      <div class="chart-wrap">
+        <canvas id="diseaseChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>Severity Breakdown</h3>
+      <div class="chart-wrap">
+        <canvas id="severityChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card chart-wide">
+      <h3>Monthly Detections Trend</h3>
+      <div class="chart-wrap-wide">
+        <canvas id="monthlyChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECENT DETECTIONS TABLE -->
+  <div class="dashboard-card">
+    <div class="dash-card-header">
+      <h3>🗃️ Recent Detections</h3>
+      <a href="{% url 'upload' %}" class="btn-sm">+ New Scan</a>
+    </div>
+    {% if recent %}
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Detection ID</th>
+            <th>Patient</th>
+            <th>Disease</th>
+            <th>Confidence</th>
+            <th>Severity</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for d in recent %}
+          <tr>
+            <td><code>{{ d.detection_id }}</code></td>
+            <td>{{ d.patient.name }}</td>
+            <td>
+              <span class="tag tag-{{ d.predicted_disease }}">
+                {% if d.predicted_disease == 'cataract' %}😶
+                {% elif d.predicted_disease == 'diabetic_retinopathy' %}🩸
+                {% elif d.predicted_disease == 'glaucoma' %}💧
+                {% else %}✅{% endif %}
+                {{ d.predicted_disease|title }}
+              </span>
+            </td>
+            <td>{{ d.confidence_score }}%</td>
+            <td><span class="severity-badge severity-{{ d.severity }}">{{ d.severity }}</span></td>
+            <td>{{ d.detection_date|date:"d M Y" }}</td>
+            <td>
+              <a href="{% url 'result' d.detection_id %}" class="btn-xs">View</a>
+              {% if d.report_pdf %}
+              <a href="{% url 'download_pdf' d.detection_id %}" class="btn-xs btn-xs-green">PDF</a>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">🔬</div>
+      <h3>No detections yet</h3>
+      <p>Upload your first eye image to see results here.</p>
+      <a href="{% url 'upload' %}" class="btn-primary">Start First Scan</a>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const diseaseData = {{ disease_json|safe }};
+const severityStats = {{ severity_stats|safe }};
+const monthlyData = {{ monthly_json|safe }};
+
+const COLORS = {
+  'Cataract': '#ef4444',
+  'Diabetic Retinopathy': '#f97316',
+  'Glaucoma': '#3b82f6',
+  'Normal': '#22c55e',
+};
+const SEV_COLORS = { 'MILD': '#22c55e', 'MODERATE': '#f97316', 'SEVERE': '#ef4444' };
+
+// Disease pie chart
+if (Object.keys(diseaseData).length > 0) {
+  new Chart(document.getElementById('diseaseChart'), {
+    type: 'doughnut',
+    data: {
+      labels: Object.keys(diseaseData),
+      datasets: [{ data: Object.values(diseaseData),
+        backgroundColor: Object.keys(diseaseData).map(k => COLORS[k] || '#6366f1'),
+        borderWidth: 2, borderColor: '#fff' }],
+    },
+    options: { responsive: true, plugins: { legend: { position: 'bottom' } } },
+  });
+}
+
+// Severity bar chart
+const sevLabels = severityStats.map(s => s.severity);
+const sevCounts = severityStats.map(s => s.count);
+if (sevLabels.length > 0) {
+  new Chart(document.getElementById('severityChart'), {
+    type: 'bar',
+    data: {
+      labels: sevLabels,
+      datasets: [{ label: 'Count', data: sevCounts,
+        backgroundColor: sevLabels.map(l => SEV_COLORS[l] || '#6366f1'),
+        borderRadius: 6 }],
+    },
+    options: { responsive: true, plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true } } },
+  });
+}
+
+// Monthly line chart
+const months = Object.keys(monthlyData);
+const counts = Object.values(monthlyData);
+if (months.length > 0) {
+  new Chart(document.getElementById('monthlyChart'), {
+    type: 'line',
+    data: {
+      labels: months,
+      datasets: [{ label: 'Detections', data: counts,
+        borderColor: '#4f46e5', backgroundColor: 'rgba(79,70,229,0.1)',
+        fill: true, tension: 0.4, pointRadius: 5,
+        pointBackgroundColor: '#4f46e5' }],
+    },
+    options: { responsive: true, scales: { y: { beginAtZero: true } } },
+  });
+}
+</script>
+{% endblock %}

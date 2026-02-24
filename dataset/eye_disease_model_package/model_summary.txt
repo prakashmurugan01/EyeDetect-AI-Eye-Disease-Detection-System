@@ -1,0 +1,19 @@
+EyeDetect AI — Trained Model Summary
+========================================
+Model type    : MobileNetV2 (Transfer Learning)
+Test accuracy : 89.80%
+Model file    : eye_disease_model.h5
+Model size    : 32.1 MB
+Classes       : ['cataract', 'diabetic_retinopathy', 'glaucoma', 'normal']
+Image size    : 224x224
+Training imgs : 2949
+Test imgs     : 637
+
+Class Indices:
+  0: cataract
+  1: diabetic_retinopathy
+  2: glaucoma
+  3: normal
+
+predictor.py update required:
+CLASSES = ['cataract', 'diabetic_retinopathy', 'glaucoma', 'normal']

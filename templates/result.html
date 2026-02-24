@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Result: {{ disease_name }} — EyeDetect AI{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <div class="page-breadcrumb">
+      <a href="{% url 'home' %}">Home</a> / <a href="{% url 'upload' %}">Scan</a> / <span>Result</span>
+    </div>
+    <h1 class="page-title">🔬 Detection Result</h1>
+    <p class="page-sub">AI Analysis Report — {{ det.detection_id }}</p>
+  </div>
+</div>
+
+<div class="container result-container">
+
+  <!-- MAIN RESULT CARD -->
+  <div class="result-hero-card disease-{{ det.predicted_disease }}">
+    <div class="result-hero-left">
+      <div class="result-disease-emoji">
+        {% if det.predicted_disease == 'cataract' %}😶
+        {% elif det.predicted_disease == 'diabetic_retinopathy' %}🩸
+        {% elif det.predicted_disease == 'glaucoma' %}💧
+        {% else %}✅{% endif %}
+      </div>
+      <div class="result-disease-info">
+        <div class="result-label">DETECTED CONDITION</div>
+        <h2 class="result-disease-name">{{ disease_name }}</h2>
+        <div class="result-badges">
+          <span class="confidence-badge">{{ det.confidence_score }}% Confidence</span>
+          <span class="severity-badge severity-{{ det.severity }}">{{ det.severity }}</span>
+        </div>
+        {% if det.predicted_disease != 'normal' %}
+        <p class="result-notice">⚠️ Consult an ophthalmologist for proper diagnosis.</p>
+        {% else %}
+        <p class="result-notice">✅ Your eye appears healthy. Continue regular check-ups.</p>
+        {% endif %}
+      </div>
+    </div>
+    <div class="result-hero-right">
+      {% if det.image %}
+      <div class="result-image-wrap">
+        <img src="{{ det.image.url }}" alt="Eye Image" class="result-eye-img"/>
+        <div class="result-image-label">📸 Analyzed Image</div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- PROBABILITY BAR CHART -->
+  {% if all_probs %}
+  <div class="result-card">
+    <h3 class="card-section-title">📊 AI Confidence for All Classes</h3>
+    <div class="prob-bars">
+      {% for disease, prob in all_probs.items %}
+      <div class="prob-bar-row">
+        <span class="prob-label">{{ disease|title }}</span>
+        <div class="prob-track">
+          <div class="prob-fill prob-{{ disease }}" style="width: {{ prob }}%"></div>
+        </div>
+        <span class="prob-value">{{ prob }}%</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- BILINGUAL EXPLANATIONS -->
+  <div class="result-two-col">
+    <div class="result-card lang-card">
+      <div class="lang-flag">🇬🇧</div>
+      <h3 class="card-section-title">English Explanation</h3>
+      <p>{{ det.english_explanation }}</p>
+    </div>
+    <div class="result-card lang-card lang-tamil">
+      <div class="lang-flag">🇮🇳</div>
+      <h3 class="card-section-title">தமிழ் விளக்கம்</h3>
+      <p class="tamil-text">{{ det.tamil_explanation }}</p>
+    </div>
+  </div>
+
+  <!-- CLINICAL DETAILS -->
+  <div class="result-four-col">
+    <!-- SYMPTOMS -->
+    <div class="result-card detail-card">
+      <h3 class="card-section-title">🔍 Symptoms</h3>
+      <ul class="detail-list">
+        {% for item in symptoms_list %}
+        <li>{{ item }}</li>
+        {% empty %}
+        <li>No symptoms information available.</li>
+        {% endfor %}
+      </ul>
+    </div>
+    <!-- CAUSES -->
+    <div class="result-card detail-card">
+      <h3 class="card-section-title">⚠️ Causes</h3>
+      <ul class="detail-list detail-causes">
+        {% for item in causes_list %}
+        <li>{{ item }}</li>
+        {% empty %}
+        <li>No causes information available.</li>
+        {% endfor %}
+      </ul>
+    </div>
+    <!-- TREATMENT -->
+    <div class="result-card detail-card">
+      <h3 class="card-section-title">💊 Treatment</h3>
+      <ul class="detail-list detail-treatment">
+        {% for item in treatment_list %}
+        <li>{{ item }}</li>
+        {% empty %}
+        <li>Consult an ophthalmologist.</li>
+        {% endfor %}
+      </ul>
+    </div>
+    <!-- PREVENTION -->
+    <div class="result-card detail-card">
+      <h3 class="card-section-title">🛡️ Prevention</h3>
+      <ul class="detail-list detail-prevention">
+        {% for item in prevention_list %}
+        <li>{{ item }}</li>
+        {% empty %}
+        <li>Regular eye check-ups recommended.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <!-- PATIENT & DETECTION META -->
+  <div class="result-card meta-card">
+    <h3 class="card-section-title">👤 Patient & Detection Details</h3>
+    <div class="meta-grid">
+      <div class="meta-item">
+        <span class="meta-key">Patient Name</span>
+        <span class="meta-val">{{ det.patient.name }}</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-key">Patient ID</span>
+        <span class="meta-val">{{ det.patient.patient_id }}</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-key">Age</span>
+        <span class="meta-val">{{ det.patient.age }} years</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-key">Detection ID</span>
+        <span class="meta-val">{{ det.detection_id }}</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-key">Scan Date</span>
+        <span class="meta-val">{{ det.detection_date|date:"d M Y, H:i" }}</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-key">Severity Level</span>
+        <span class="meta-val severity-badge severity-{{ det.severity }}">{{ det.severity }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- DISCLAIMER -->
+  <div class="result-card disclaimer-result">
+    {% if det.disclaimer %}
+    {{ det.disclaimer }}
+    {% else %}
+    ⚠️ DISCLAIMER: This AI result is for preliminary screening only. Always consult a qualified ophthalmologist.
+    {% endif %}
+  </div>
+
+  <!-- ACTION BUTTONS -->
+  <div class="result-actions">
+    {% if det.report_pdf %}
+    <a href="{% url 'download_pdf' det.detection_id %}" class="btn-primary">
+      📄 Download PDF Report
+    </a>
+    {% endif %}
+    <a href="{% url 'upload' %}" class="btn-ghost">🔬 New Scan</a>
+    <a href="{% url 'chatbot' %}" class="btn-ghost">🤖 Ask Dr. Bot</a>
+    <a href="{% url 'dashboard' %}" class="btn-ghost">📊 Dashboard</a>
+  </div>
+
+</div>
+{% endblock %}

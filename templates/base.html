@@ -1,0 +1,64 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}Eye Disease Detection System{% endblock %}</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👁️</text></svg>"/>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}"/>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-inner">
+    <a href="{% url 'home' %}" class="nav-brand">
+      <span class="brand-icon">👁️</span>
+      <span class="brand-text">EyeDetect<span class="brand-accent">AI</span></span>
+    </a>
+    <div class="nav-links">
+      <a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a>
+      <a href="{% url 'upload' %}" class="nav-link {% if request.resolver_match.url_name == 'upload' %}active{% endif %}">Scan</a>
+      <a href="{% url 'webcam' %}" class="nav-link {% if request.resolver_match.url_name == 'webcam' %}active{% endif %}">Webcam</a>
+      <a href="{% url 'chatbot' %}" class="nav-link {% if request.resolver_match.url_name == 'chatbot' %}active{% endif %}">Dr. Bot</a>
+      <a href="{% url 'dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">Dashboard</a>
+    </div>
+    <a href="{% url 'upload' %}" class="nav-cta">New Scan →</a>
+    <button class="nav-toggle" id="navToggle" aria-label="Menu">☰</button>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="{% url 'home' %}">Home</a>
+  <a href="{% url 'upload' %}">Scan</a>
+  <a href="{% url 'webcam' %}">Webcam</a>
+  <a href="{% url 'chatbot' %}">Dr. Bot</a>
+  <a href="{% url 'dashboard' %}">Dashboard</a>
+</div>
+
+<main>
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <span>👁️ EyeDetect<strong>AI</strong></span>
+      <p>AI-powered eye disease screening system</p>
+    </div>
+    <div class="footer-disclaimer">
+      ⚠️ For educational screening only — not a substitute for professional medical diagnosis.
+      Always consult a certified ophthalmologist.
+    </div>
+    <div class="footer-tech">
+      Built with Django · TensorFlow · GPT-4 · ReportLab
+    </div>
+  </div>
+</footer>
+
+<script src="{% static 'js/main.js' %}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

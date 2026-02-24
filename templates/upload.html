@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Upload Eye Image — EyeDetect AI{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <div class="page-breadcrumb">
+      <a href="{% url 'home' %}">Home</a> / <span>New Scan</span>
+    </div>
+    <h1 class="page-title">🔬 Eye Disease Scan</h1>
+    <p class="page-sub">Upload a clear fundus or eye photo and let our AI analyze it.</p>
+  </div>
+</div>
+
+<div class="container upload-container">
+  {% if error %}
+  <div class="alert alert-error">⚠️ {{ error }}</div>
+  {% endif %}
+
+  <form method="POST" enctype="multipart/form-data" id="uploadForm" class="upload-form">
+    {% csrf_token %}
+
+    <!-- Image Upload Zone -->
+    <div class="upload-card">
+      <h2 class="card-title">📸 Eye Image</h2>
+      <div class="drop-zone" id="dropZone">
+        <div class="drop-icon">👁️</div>
+        <h3 class="drop-title">Drag & drop your eye image here</h3>
+        <p class="drop-sub">or click to browse — JPG, PNG, WEBP accepted</p>
+        <label class="btn-upload" for="eye_image">Choose File</label>
+        <input type="file" id="eye_image" name="eye_image"
+               accept="image/jpeg,image/png,image/webp" required hidden/>
+      </div>
+      <div class="image-preview hidden" id="imagePreview">
+        <img id="previewImg" src="" alt="Preview"/>
+        <div class="preview-info">
+          <span id="previewName"></span>
+          <button type="button" class="remove-btn" id="removeBtn">✕ Remove</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Patient Info -->
+    <div class="upload-card">
+      <h2 class="card-title">👤 Patient Information</h2>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="patient_name">Full Name <span class="required">*</span></label>
+          <input type="text" id="patient_name" name="patient_name"
+                 placeholder="Enter patient name" required/>
+        </div>
+        <div class="form-group">
+          <label for="patient_age">Age (years) <span class="required">*</span></label>
+          <input type="number" id="patient_age" name="patient_age"
+                 min="1" max="120" placeholder="e.g. 45" required/>
+        </div>
+        <div class="form-group">
+          <label for="patient_gender">Gender</label>
+          <select id="patient_gender" name="patient_gender">
+            <option value="O">Prefer not to say</option>
+            <option value="M">Male</option>
+            <option value="F">Female</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="patient_phone">Phone (optional)</label>
+          <input type="tel" id="patient_phone" name="patient_phone"
+                 placeholder="+91 98765 43210"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Guidelines -->
+    <div class="upload-card info-card">
+      <h2 class="card-title">💡 Image Guidelines</h2>
+      <div class="guidelines-grid">
+        <div class="guideline good">
+          <span class="gl-icon">✅</span>
+          <div>
+            <strong>Good images</strong>
+            <p>Clear fundus photos, minimum 300×300px, well-lit</p>
+          </div>
+        </div>
+        <div class="guideline bad">
+          <span class="gl-icon">❌</span>
+          <div>
+            <strong>Avoid</strong>
+            <p>Blurry, dark, or obstructed images — they reduce accuracy</p>
+          </div>
+        </div>
+      </div>
+      <div class="disclaimer-box">
+        ⚠️ <strong>Disclaimer:</strong> This is an AI-powered screening tool only.
+        Results do not constitute a medical diagnosis. Always consult a certified ophthalmologist.
+      </div>
+    </div>
+
+    <div class="upload-actions">
+      <button type="submit" class="btn-primary btn-lg" id="submitBtn">
+        <span id="btnText">🔬 Analyze Eye Image</span>
+        <span id="btnLoading" class="hidden">⏳ Analyzing... please wait</span>
+      </button>
+      <a href="{% url 'webcam' %}" class="btn-ghost">📷 Use Webcam Instead</a>
+    </div>
+  </form>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('eye_image');
+const imagePreview = document.getElementById('imagePreview');
+const previewImg = document.getElementById('previewImg');
+const previewName = document.getElementById('previewName');
+const removeBtn = document.getElementById('removeBtn');
+const form = document.getElementById('uploadForm');
+const submitBtn = document.getElementById('submitBtn');
+const btnText = document.getElementById('btnText');
+const btnLoading = document.getElementById('btnLoading');
+
+// Click zone
+dropZone.addEventListener('click', () => fileInput.click());
+
+// Drag events
+['dragover', 'dragenter'].forEach(e => {
+  dropZone.addEventListener(e, ev => {
+    ev.preventDefault(); dropZone.classList.add('drag-over');
+  });
+});
+['dragleave', 'drop'].forEach(e => {
+  dropZone.addEventListener(e, ev => {
+    ev.preventDefault(); dropZone.classList.remove('drag-over');
+  });
+});
+dropZone.addEventListener('drop', e => {
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) {
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    fileInput.files = dt.files;
+    showPreview(file);
+  }
+});
+
+fileInput.addEventListener('change', () => {
+  if (fileInput.files[0]) showPreview(fileInput.files[0]);
+});
+
+function showPreview(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    previewImg.src = e.target.result;
+    previewName.textContent = file.name;
+    dropZone.classList.add('hidden');
+    imagePreview.classList.remove('hidden');
+  };
+  reader.readAsDataURL(file);
+}
+
+removeBtn.addEventListener('click', () => {
+  fileInput.value = '';
+  dropZone.classList.remove('hidden');
+  imagePreview.classList.add('hidden');
+});
+
+form.addEventListener('submit', () => {
+  btnText.classList.add('hidden');
+  btnLoading.classList.remove('hidden');
+  submitBtn.disabled = true;
+});
+</script>
+{% endblock %}

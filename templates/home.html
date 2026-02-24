@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}EyeDetect AI — Home{% endblock %}
+
+{% block content %}
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg-grid"></div>
+  <div class="hero-inner">
+    <div class="hero-badge">🧠 Powered by ResNet50 + GPT-4</div>
+    <h1 class="hero-title">
+      Detect Eye Diseases<br/>
+      <span class="gradient-text">Before It's Too Late</span>
+    </h1>
+    <p class="hero-sub">
+      Upload a single eye image. Our AI detects Cataract, Diabetic Retinopathy,
+      Glaucoma, or confirms a healthy eye — with a bilingual English &amp; Tamil
+      medical report in seconds.
+    </p>
+    <div class="hero-actions">
+      <a href="{% url 'upload' %}" class="btn-primary">
+        <span>🔬 Start Eye Scan</span>
+      </a>
+      <a href="{% url 'webcam' %}" class="btn-ghost">
+        <span>📷 Use Webcam</span>
+      </a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-pill">
+        <strong>{{ total_detections|default:"0" }}</strong>
+        <span>Scans Done</span>
+      </div>
+      <div class="stat-pill">
+        <strong>{{ total_patients|default:"0" }}</strong>
+        <span>Patients</span>
+      </div>
+      <div class="stat-pill">
+        <strong>~95%</strong>
+        <span>Accuracy</span>
+      </div>
+      <div class="stat-pill">
+        <strong>4</strong>
+        <span>Diseases</span>
+      </div>
+    </div>
+  </div>
+  <div class="hero-eye-visual">
+    <div class="eye-ring ring-1"></div>
+    <div class="eye-ring ring-2"></div>
+    <div class="eye-ring ring-3"></div>
+    <div class="eye-core">👁️</div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section">
+  <div class="container">
+    <div class="section-label">How It Works</div>
+    <h2 class="section-title">Three steps to a full diagnosis</h2>
+    <div class="steps-grid">
+      <div class="step-item">
+        <div class="step-num">01</div>
+        <div class="step-icon">📸</div>
+        <h3>Upload Image</h3>
+        <p>Upload a fundus or eye photo, or capture live with your webcam. JPG/PNG accepted.</p>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step-item">
+        <div class="step-num">02</div>
+        <div class="step-icon">🧠</div>
+        <h3>AI Analysis</h3>
+        <p>ResNet50 deep learning model analyzes the image. GPT-4 generates a full medical report.</p>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step-item">
+        <div class="step-num">03</div>
+        <div class="step-icon">📄</div>
+        <h3>Download Report</h3>
+        <p>Get a bilingual (English + Tamil) PDF with diagnosis, symptoms, treatment, and prevention.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DISEASES -->
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-label">Detectable Conditions</div>
+    <h2 class="section-title">4 Eye diseases our AI recognizes</h2>
+    <div class="disease-cards">
+      <div class="disease-card dc-cataract">
+        <div class="dc-emoji">😶</div>
+        <h3>Cataract</h3>
+        <p class="dc-tamil">கண்புரை</p>
+        <p>Clouding of the eye lens causing blurred vision. Treatable with surgery.</p>
+        <div class="dc-badge">Lens Clouding</div>
+      </div>
+      <div class="disease-card dc-diabetic">
+        <div class="dc-emoji">🩸</div>
+        <h3>Diabetic Retinopathy</h3>
+        <p class="dc-tamil">நீரிழிவு விழித்திரை நோய்</p>
+        <p>Damage to retinal blood vessels from high blood sugar levels.</p>
+        <div class="dc-badge">Blood Vessel Damage</div>
+      </div>
+      <div class="disease-card dc-glaucoma">
+        <div class="dc-emoji">💧</div>
+        <h3>Glaucoma</h3>
+        <p class="dc-tamil">கண் அழுத்த நோய்</p>
+        <p>Elevated intraocular pressure damaging the optic nerve.</p>
+        <div class="dc-badge">Pressure Damage</div>
+      </div>
+      <div class="disease-card dc-normal">
+        <div class="dc-emoji">✅</div>
+        <h3>Normal Eye</h3>
+        <p class="dc-tamil">ஆரோக்கியமான கண்</p>
+        <p>Healthy eye with no detected signs of any disease.</p>
+        <div class="dc-badge">Healthy</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section">
+  <div class="container">
+    <div class="section-label">Features</div>
+    <h2 class="section-title">Everything you need for eye screening</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feat-icon">🌐</div>
+        <h4>Bilingual Reports</h4>
+        <p>Full explanations in English and Tamil for broader accessibility.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feat-icon">📄</div>
+        <h4>PDF Download</h4>
+        <p>Professional medical-grade PDF reports you can share with doctors.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feat-icon">📷</div>
+        <h4>Webcam Support</h4>
+        <p>Capture images live with your device's webcam — no file upload needed.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feat-icon">🤖</div>
+        <h4>AI Chatbot</h4>
+        <p>Ask Dr. Bot any eye health questions in English or Tamil.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feat-icon">📊</div>
+        <h4>Dashboard</h4>
+        <p>Visual analytics of all detections, disease distribution, and trends.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feat-icon">🎯</div>
+        <h4>95% Accuracy</h4>
+        <p>ResNet50 transfer learning trained on thousands of fundus images.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section cta-section">
+  <div class="container cta-inner">
+    <h2>Ready to scan your eyes?</h2>
+    <p>Upload an eye image now and get your AI-powered screening report in seconds.</p>
+    <a href="{% url 'upload' %}" class="btn-primary btn-lg">🔬 Start Free Scan →</a>
+  </div>
+</section>
+{% endblock %}

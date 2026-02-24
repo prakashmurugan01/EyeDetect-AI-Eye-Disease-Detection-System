@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Detection History — EyeDetect AI{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <div class="page-breadcrumb">
+      <a href="{% url 'home' %}">Home</a> / <span>History</span>
+    </div>
+    <h1 class="page-title">📋 Detection History</h1>
+    <p class="page-sub">All past eye disease scans and results.</p>
+  </div>
+</div>
+
+<div class="container">
+  {% if detections %}
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Patient</th>
+          <th>Disease</th>
+          <th>Confidence</th>
+          <th>Severity</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for d in detections %}
+        <tr>
+          <td><code>{{ d.detection_id }}</code></td>
+          <td>{{ d.patient.name }}</td>
+          <td>
+            <span class="tag tag-{{ d.predicted_disease }}">
+              {% if d.predicted_disease == 'cataract' %}😶
+              {% elif d.predicted_disease == 'diabetic_retinopathy' %}🩸
+              {% elif d.predicted_disease == 'glaucoma' %}💧
+              {% else %}✅{% endif %}
+              {{ d.predicted_disease|title }}
+            </span>
+          </td>
+          <td>{{ d.confidence_score }}%</td>
+          <td><span class="severity-badge severity-{{ d.severity }}">{{ d.severity }}</span></td>
+          <td>{{ d.detection_date|date:"d M Y" }}</td>
+          <td>
+            <a href="{% url 'result' d.detection_id %}" class="btn-xs">View</a>
+            {% if d.report_pdf %}
+            <a href="{% url 'download_pdf' d.detection_id %}" class="btn-xs btn-xs-green">PDF</a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">🔬</div>
+    <h3>No detections yet</h3>
+    <p>Upload your first eye image to get started.</p>
+    <a href="{% url 'upload' %}" class="btn-primary">Start First Scan</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
